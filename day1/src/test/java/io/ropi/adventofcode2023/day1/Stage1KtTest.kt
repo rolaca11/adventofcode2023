@@ -24,13 +24,13 @@ class Stage1KtTest {
 
         @Test
         fun `example input`() {
-            assertThat(this::class.java.classLoader.getResource("stage1-example")?.let { start(it.readText()) })
+            assertThat(this::class.java.classLoader.getResource("stage1-example")?.let { stage1(it.readText()) })
                 .isEqualTo(142)
         }
 
         @Test
         fun `actual input`() {
-            assertThat(this::class.java.classLoader.getResource("stage1")?.let { start(it.readText()) })
+            assertThat(this::class.java.classLoader.getResource("actual")?.let { stage1(it.readText()) })
                 .isEqualTo(55488)
         }
     }
