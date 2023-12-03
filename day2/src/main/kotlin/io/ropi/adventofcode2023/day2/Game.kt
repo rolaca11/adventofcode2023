@@ -5,16 +5,7 @@ data class Game(
     val samples: Collection<Sample>
 ) {
     fun isValid(existingColors: Map<Color, Int>): Boolean {
-        val mergedSamples = samples.map { it.colors }.reduce { acc, map ->
-            val result = acc.toMutableMap()
-            map.entries.forEach { entry ->
-                if (!acc.containsKey(entry.key) || entry.value > (acc[entry.key] ?: 0)) {
-                    result[entry.key] = entry.value
-                }
-            }
-
-            result
-        }
+        val mergedSamples = minimumRequiredColors()
 
         return existingColors.map { (color, count) ->
             mergedSamples.getOrDefault(color, 0) <= count
@@ -22,6 +13,20 @@ data class Game(
             acc && bool
         }
     }
+
+    private fun minimumRequiredColors() = samples.map { it.colors }.reduce { acc, map ->
+        val result = acc.toMutableMap()
+        map.entries.forEach { entry ->
+            if (!acc.containsKey(entry.key) || entry.value > (acc[entry.key] ?: 0)) {
+                result[entry.key] = entry.value
+            }
+        }
+
+        result
+    }
+
+    val power: Long
+        get() = minimumRequiredColors().map { it.value.toLong() }.reduce { left, right -> left * right }
 
     companion object {
         private val REGEX = Regex("^Game (\\d+): (.*)$")
