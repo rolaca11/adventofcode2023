@@ -8,8 +8,10 @@ data class Card(
     val actualNumbers: List<Int>
 ) {
     val value: Int
-        get() = winningNumbers.filter { actualNumbers.contains(it) }.size
+        get() = findNumberOfHits()
             .let { if (it > 0) 2.0.pow(it - 1).toInt() else null } ?: 0
+
+    fun findNumberOfHits() = winningNumbers.filter { actualNumbers.contains(it) }.size
 
     companion object {
         private val CARD_REGEX = Regex("Card\\s+(\\d+):\\s+([0-9\\s]+) \\|\\s+([0-9\\s]+)")
