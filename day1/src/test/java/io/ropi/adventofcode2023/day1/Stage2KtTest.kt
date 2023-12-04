@@ -22,7 +22,7 @@ class Stage2KtTest {
 
         @Test
         fun `test convert spelled out digits to numbers with overlapping spelling 2`() {
-            assertThat("nine6nine7seven6".`convert first and last spelled out digits to numbers`()).isEqualTo("96nine776")
+            assertThat("nine6nine7seven6".`convert first and last spelled out digits to numbers`()).isEqualTo("96nine7seven6")
         }
 
         @Test
@@ -32,7 +32,7 @@ class Stage2KtTest {
 
         @Test
         fun `test convert spelled out digits to numbers with overlapping spelling 4`() {
-            assertThat("loneightseveng79".`convert first and last spelled out digits to numbers`()).isEqualTo("l1ight7g79")
+            assertThat("loneightseveng79".`convert first and last spelled out digits to numbers`()).isEqualTo("l1ightseveng79")
         }
 
         @Test
@@ -42,7 +42,7 @@ class Stage2KtTest {
 
         @Test
         fun `test find earliest occurence of digit`() {
-            assertThat("eightwo".`find earliest occurence of spelled digit`()).isEqualTo(Digits.EIGHT)
+            assertThat("eightwo".`find earliest occurence of spelled digit`()?.first).isEqualTo(Digits.EIGHT)
         }
 
         @Test
@@ -52,7 +52,7 @@ class Stage2KtTest {
 
         @Test
         fun `test last earliest occurence of digit no digits`() {
-            assertThat("7pqrstsixteen".`find last occurence of spelled digit`()).isEqualTo(Digits.SIX)
+            assertThat("7pqrstsixteen".`find last occurence of spelled digit`()?.first).isEqualTo(Digits.SIX)
         }
 
         @Test

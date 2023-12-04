@@ -1,13 +1,20 @@
 package io.ropi.adventofcode2023.day3
 
-import kotlin.math.absoluteValue
-
 data class Schematic(
     private val parts: List<Part>
 ) {
     val partNumbers: List<Part.Number>
         get() = parts.filterIsInstance<Part.Number>()
             .filter { parts.filterIsInstance<Part.Symbol>().any { symbol -> symbol.isAdjacentTo(it) } }
+
+    val gearRatios: List<Triple<Part.Number, Part.Symbol, Part.Number>>
+        get() {
+            val starSymbols = parts.filterIsInstance<Part.Symbol>().filter { it.symbol == "*" }
+                .map { it to parts.filterIsInstance<Part.Number>().filter { num -> it.isAdjacentTo(num) } }
+
+            return starSymbols.filter { it.second.size == 2 }
+                .map { Triple(it.second[0], it.first, it.second[1]) }
+        }
 
     companion object {
         private val NUMBER_REGEX = Regex("[0-9]+")
@@ -62,9 +69,8 @@ sealed class Part(
 
     fun isAdjacentTo(part: Part): Boolean {
         val difference = this.position - part.position
-        return difference.y.absoluteValue <= 1 &&
-                difference.x >= -1 &&
-                difference.x - part.length < length
+        return difference.y in -1..1 &&
+                difference.x in -1..part.length
     }
 
     override fun toString(): String {
