@@ -25,7 +25,51 @@ class MappingRangeTest {
             rangeLength = 5
         )
 
-        assertThat(subject[5]).isEqualTo(5)
-        assertThat(subject[14]).isEqualTo(14)
+        assertThat(subject[5]).isNull()
+        assertThat(subject[14]).isNull()
+    }
+
+    @Test
+    fun `test map range within`() {
+        val subject = MappingRange(
+            destinationRangeStart = 100,
+            sourceRangeStart = 10,
+            rangeLength = 5
+        )
+
+        assertThat(subject.mapRange(11L..13L)).isEqualTo(101L..103L)
+    }
+
+    @Test
+    fun `test map range lower start, end within`() {
+        val subject = MappingRange(
+            destinationRangeStart = 100,
+            sourceRangeStart = 10,
+            rangeLength = 5
+        )
+
+        assertThat(subject.mapRange(8L..13L)).isEqualTo(100L..103L)
+    }
+
+    @Test
+    fun `test map range within start, end higher`() {
+        val subject = MappingRange(
+            destinationRangeStart = 100,
+            sourceRangeStart = 10,
+            rangeLength = 5
+        )
+
+        assertThat(subject.mapRange(11L..17L)).isEqualTo(101L..104L)
+    }
+
+    @Test
+    fun `test map range lower start, end higher`() {
+        val subject = MappingRange(
+            destinationRangeStart = 100,
+            sourceRangeStart = 10,
+            rangeLength = 5
+        )
+
+        assertThat(subject.mapRange(8L..17L)).isEqualTo(100L..104L)
     }
 }
