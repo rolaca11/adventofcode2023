@@ -7,12 +7,12 @@ class Stage2KtTest {
     @Test
     fun stage2Example() {
         assertThat(this::class.java.classLoader.getResource("stage1-example")?.let { stage2(it.readText()) })
-            .isEqualTo(71503)
+            .isEqualTo(5905)
     }
 
     @Test
     fun stage2Actual() {
         assertThat(this::class.java.classLoader.getResource("actual")?.let { stage2(it.readText()) })
-            .isEqualTo(46561107)
+            .isEqualTo(248909434L)
     }
 }

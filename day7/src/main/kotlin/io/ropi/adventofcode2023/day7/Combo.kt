@@ -10,7 +10,6 @@ enum class Combos : Combo {
             return labelGroups.size == 5
         }
 
-
     },
 
     OnePair {
@@ -21,8 +20,6 @@ enum class Combos : Combo {
 
             return labelGroups.size == 4 && labelGroups.values.filter { it.size == 2 }.size == 1
         }
-
-
     },
 
     TwoPair {
@@ -85,4 +82,8 @@ interface Combo {
     val value: Int
 
     fun isApplicable(hand: Hand): Boolean
+
+    fun isApplicableWithJoker(hand: Hand): Boolean {
+        return hand.jokerExpandedHands.any { isApplicable(it) }
+    }
 }
