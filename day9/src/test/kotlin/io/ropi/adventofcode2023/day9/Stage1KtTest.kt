@@ -15,6 +15,6 @@ class Stage1KtTest {
     fun stage1Actual() {
         Assertions.assertThat(
             this::class.java.classLoader.getResource("actual")?.let { stage1(it.readText()) })
-            .isEqualTo(114)
+            .isEqualTo(1995001648L)
     }
 }
