@@ -6,9 +6,9 @@ import org.junit.jupiter.api.Test
 class Stage1KtTest {
     @Test
     fun stage1Example() {
-        assertThat(this::class.java.classLoader.getResource("example1")?.let { stage1(it.readText()) })
+        assertThat(this::class.java.classLoader.getResource("stage1-example1")?.let { stage1(it.readText()) })
             .isEqualTo(2)
-        assertThat(this::class.java.classLoader.getResource("example2")?.let { stage1(it.readText()) })
+        assertThat(this::class.java.classLoader.getResource("stage2-example2")?.let { stage1(it.readText()) })
             .isEqualTo(6)
     }
 

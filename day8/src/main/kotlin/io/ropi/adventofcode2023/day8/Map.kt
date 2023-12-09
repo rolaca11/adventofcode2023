@@ -1,19 +1,18 @@
 package io.ropi.adventofcode2023.day8
 
 class Map(
-    val startingNode: Node,
-    val endingNode: Node,
+    val startingNode: List<Node>,
     val directions: List<Direction>
 ) {
     fun stepsToGetEndingNode(): List<Direction> {
         val result = mutableListOf<Direction>()
 
-        var currentNode = startingNode
+        var currentNodes = startingNode
         for (direction in directions.asSequence().repeat()) {
-            currentNode = direction.next(currentNode)
+            currentNodes = currentNodes.map { direction.next(it) }
             result.add(direction)
 
-            if (currentNode == endingNode) {
+            if (currentNodes.all { it.label.endsWith("Z") }) {
                 break
             }
         }
@@ -21,7 +20,9 @@ class Map(
         return result
     }
 
-    class Node(var left: Node? = null, var right: Node? = null)
+    class Node(val label: String = "", var left: Node? = null, var right: Node? = null) {
+        override fun toString() = label
+    }
 
     enum class Direction(val label: Char, val next: Node.() -> Node) {
         LEFT('L', { this.left ?: throw Error() }),
@@ -31,25 +32,33 @@ class Map(
     private fun <T> Sequence<T>.repeat() = sequence { while (true) yieldAll(this@repeat) }
 
     companion object {
-        private val REGEX = Regex("([A-Z]+) = \\(([A-Z]+), ([A-Z]+)\\)")
-        fun parseFrom(input: String): Map {
+        private val REGEX = Regex("([0-9A-Z]+) = \\(([0-9A-Z]+), ([0-9A-Z]+)\\)")
+        fun parseFrom(input: String, startingNodeLabel: String): Map {
             val split = input.split("\n\n")
+            val directions = parseDirections(split[0])
+            val nodeMap = parseNodeMap(split[1])
 
-            val directions = split[0].map { Direction.entries.find { direction -> direction.label == it }!! }
-            val nodeMap = split[1].lines().map { REGEX.matchEntire(it)!!.groupValues[1] to Node() }.toMap()
+            return Map(
+                startingNode = listOf(nodeMap[startingNodeLabel]!!),
+                directions = directions
+            )
+        }
 
-            split[1].lines().map { REGEX.matchEntire(it)!!.groupValues }
+        fun parseDirections(input: String): List<Direction> {
+            return input.map { Direction.entries.find { direction -> direction.label == it }!! }
+        }
+
+        fun parseNodeMap(input: String): kotlin.collections.Map<String, Node> {
+            val nodeMap = input.lines()
+                .associate { REGEX.matchEntire(it)!!.groupValues[1] to Node(REGEX.matchEntire(it)!!.groupValues[1]) }
+
+            input.lines().map { REGEX.matchEntire(it)!!.groupValues }
                 .map { nodeMap[it[1]] to (nodeMap[it[2]] to nodeMap[it[3]]) }
                 .forEach {
                     it.first?.left = it.second.first
                     it.first?.right = it.second.second
                 }
-
-            return Map(
-                startingNode = nodeMap["AAA"]!!,
-                endingNode = nodeMap["ZZZ"]!!,
-                directions = directions
-            )
+            return nodeMap
         }
     }
 }

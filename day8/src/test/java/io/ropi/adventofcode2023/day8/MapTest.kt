@@ -7,10 +7,9 @@ import org.junit.jupiter.api.Test
 class MapTest {
     @Test
     fun `test next node`() {
-        val endingNode = Map.Node(null, null)
+        val endingNode = Map.Node("AAZ", null, null)
         val subject = Map(
-            startingNode = Map.Node(left = endingNode, right = null),
-            endingNode = endingNode,
+            startingNode = listOf(Map.Node(left = endingNode, right = null)),
             directions = listOf(Map.Direction.LEFT)
         )
 
