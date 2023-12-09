@@ -10,6 +10,14 @@ class Sequence(val values: List<Long>) {
         return differentiate().findNextValue() + values.last()
     }
 
+    fun findPreviousValue(): Long {
+        if (values.all { it == 0L }) {
+            return 0
+        }
+
+        return values.first() - differentiate().findPreviousValue()
+    }
+
     private fun differentiate(): Sequence {
         val result = mutableListOf<Long>()
 
