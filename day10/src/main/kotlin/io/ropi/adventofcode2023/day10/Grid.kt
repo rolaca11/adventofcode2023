@@ -9,6 +9,77 @@ class Grid(
 
     operator fun get(position: Position) = tiles[position]
 
+    fun groupTilesByComponent(): List<Component> {
+        val mainLoop = tileDistanceMap().keys
+        val components = mutableListOf(
+            Component(
+                tiles = mainLoop.toList(),
+                grid = this,
+                isMainLoop = true
+            )
+        )
+
+        while (true) {
+            val firstTile = tiles.values.find { tile -> !components.any { it.tiles.contains(tile) } } ?: break
+
+            components += Component(findAllTilesInComponent(firstTile), this)
+        }
+
+        return components
+    }
+
+    fun findAllTilesInComponent(firstTile: Tile): List<Tile> {
+        val route = LinkedList<Tile>()
+        route += firstTile
+        val currentComponent = mutableListOf(firstTile)
+
+        while (true) {
+            val tile = try {
+                route.first.let { it.neighbours(this).filter { neighbour -> neighbour.isInSameComponentAs(it, this) } }
+                    .filter { !route.contains(it) }
+                    .findOrThrow { !currentComponent.contains(it) }
+            } catch (e: NoSuchElementException) {
+                if (route.isEmpty()) {
+                    break
+                } else {
+                    route.pop()
+                    continue
+                }
+            }
+
+            route.push(tile)
+            currentComponent += tile
+        }
+
+        return currentComponent
+    }
+
+    fun expandedGrid(): Grid {
+        return Grid(tiles.values.flatMap {
+            val copy = it.copy(it.position * 2)
+            listOfNotNull(
+                copy.position to copy,
+                copy.position + Position(1, 1) to Tile.EmptyTile(copy.position + Position(1, 1)),
+                it.bottom(this)?.let { tile ->
+                    val newPosition = copy.position + Position(1, 0)
+                    newPosition to if (it.isConnectedTo(tile, this)) {
+                        Tile.HorizontalPipe(newPosition)
+                    } else {
+                        Tile.EmptyTile(newPosition)
+                    }
+                },
+                it.right(this)?.let { tile ->
+                    val newPosition = copy.position + Position(1, 0)
+                    newPosition to if (it.isConnectedTo(tile, this)) {
+                        Tile.HorizontalPipe(newPosition)
+                    } else {
+                        Tile.EmptyTile(newPosition)
+                    }
+                },
+            )
+        }.toMap())
+    }
+
     fun tileDistanceMap(): Map<Tile, Int> {
         val result = mutableMapOf<Tile, Int>()
 
@@ -18,9 +89,8 @@ class Grid(
         result[startingTile] = 0
 
         while (true) {
-
             val current = try {
-                route.first.neighbours(this)
+                route.first.connectedNeighbours(this)
                     .filter { !result.containsKey(it) || result[it]!! > route.size }
                     .findOrThrow { !route.contains(it) }
             } catch (e: NoSuchElementException) {
@@ -42,15 +112,6 @@ class Grid(
         return result.filterNot { it.key is Tile.EmptyTile }
     }
 
-    private fun Tile.crawl(distance: Int, visitedTiles: MutableMap<Tile, Int>) {
-        neighbours(this@Grid)
-            .filterNot { visitedTiles.containsKey(it) && visitedTiles[it]!! <= distance }
-            .forEach {
-                it?.apply { visitedTiles[this] = distance + 1 }
-                    ?.crawl(distance + 1, visitedTiles)
-            }
-    }
-
     inner class Row(private val x: Int) {
         operator fun get(y: Int) = this@Grid.tiles[Position(x = x, y = y)]
     }
@@ -67,5 +128,5 @@ class Grid(
     }
 }
 
-private fun <T> Iterable<T>.findOrThrow(predicate: (T) -> Boolean) =
+internal fun <T> Iterable<T>.findOrThrow(predicate: (T) -> Boolean) =
     this.find(predicate) ?: throw NoSuchElementException()

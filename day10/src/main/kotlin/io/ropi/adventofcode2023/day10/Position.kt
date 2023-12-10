@@ -8,6 +8,8 @@ data class Position(
 
     operator fun plus(other: Position) = Position(x + other.x, y + other.y)
 
+    operator fun times(factor: Int) = Position(x * factor, y * factor)
+
     companion object {
         val LEFT = Position(-1, 0)
         val TOP = Position(0, -1)

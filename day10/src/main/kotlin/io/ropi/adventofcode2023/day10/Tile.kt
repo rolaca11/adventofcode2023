@@ -1,79 +1,107 @@
 package io.ropi.adventofcode2023.day10
 
 sealed class Tile(
-    private val position: Position,
+    val position: Position,
 ) {
     fun left(grid: Grid) = grid.neighbour(Position.LEFT)
     fun top(grid: Grid) = grid.neighbour(Position.TOP)
     fun right(grid: Grid) = grid.neighbour(Position.RIGHT)
     fun bottom(grid: Grid) = grid.neighbour(Position.BOTTOM)
 
-    protected fun Grid.neighbour(diff: Position): Tile? {
+    private fun Grid.neighbour(diff: Position): Tile? {
         return this[position + diff]
     }
 
-    abstract val Grid.neighbours: List<Tile>
+    protected abstract val Grid.connectedNeighbours: List<Tile>
 
-    private fun isConnectedTo(tile: Tile, grid: Grid) = grid.neighbours.contains(tile)
+    fun isConnectedTo(tile: Tile, grid: Grid) = grid.connectedNeighbours.contains(tile)
 
-    fun neighbours(grid: Grid) = grid.neighbours.filter { it.isConnectedTo(this@Tile, grid) }
+    fun connectedNeighbours(grid: Grid) = grid.connectedNeighbours.filter { it.isConnectedTo(this@Tile, grid) }
+
+    fun neighbours(grid: Grid) = listOfNotNull(top(grid), bottom(grid), left(grid), right(grid))
+
+    open fun isInSameComponentAs(tile: Tile, grid: Grid) = isConnectedTo(tile, grid)
+
+    fun isEdgeTile(grid: Grid) = neighbours(grid).size < 4
 
     override fun toString() = position.toString()
+
+    abstract fun copy(position: Position): Tile
 
     class VerticalPipe(
         position: Position,
     ) : Tile(position) {
-        override val Grid.neighbours: List<Tile>
+        override val Grid.connectedNeighbours: List<Tile>
             get() = listOfNotNull(top(this), bottom(this))
+
+        override fun copy(position: Position) = VerticalPipe(position)
     }
 
     class HorizontalPipe(
         position: Position,
     ) : Tile(position) {
-        override val Grid.neighbours: List<Tile>
+        override val Grid.connectedNeighbours: List<Tile>
             get() = listOfNotNull(left(this), right(this))
+
+        override fun copy(position: Position) = HorizontalPipe(position)
     }
 
     class NorthEastPipe(
         position: Position,
     ) : Tile(position) {
-        override val Grid.neighbours: List<Tile>
+        override val Grid.connectedNeighbours: List<Tile>
             get() = listOfNotNull(top(this), right(this))
+
+        override fun copy(position: Position) = NorthEastPipe(position)
     }
 
     class NorthWestPipe(
         position: Position,
     ) : Tile(position) {
-        override val Grid.neighbours: List<Tile>
+        override val Grid.connectedNeighbours: List<Tile>
             get() = listOfNotNull(top(this), left(this))
+
+        override fun copy(position: Position) = NorthWestPipe(position)
     }
 
     class SouthWestPipe(
         position: Position,
     ) : Tile(position) {
-        override val Grid.neighbours: List<Tile>
+        override val Grid.connectedNeighbours: List<Tile>
             get() = listOfNotNull(bottom(this), left(this))
+
+        override fun copy(position: Position) = SouthWestPipe(position)
     }
 
     class SouthEastPipe(
         position: Position,
     ) : Tile(position) {
-        override val Grid.neighbours: List<Tile>
+        override val Grid.connectedNeighbours: List<Tile>
             get() = listOfNotNull(bottom(this), right(this))
+
+        override fun copy(position: Position) = SouthEastPipe(position)
     }
 
     class StartingTile(
         position: Position,
     ) : Tile(position) {
-        override val Grid.neighbours: List<Tile>
+        override val Grid.connectedNeighbours: List<Tile>
             get() = listOfNotNull(top(this), bottom(this), left(this), right(this))
+
+        override fun copy(position: Position) = StartingTile(position)
     }
 
     class EmptyTile(
         position: Position,
     ) : Tile(position) {
-        override val Grid.neighbours: List<Tile>
+        override val Grid.connectedNeighbours: List<Tile>
             get() = emptyList()
+
+        override fun copy(position: Position) = EmptyTile(position)
+
+        override fun isInSameComponentAs(tile: Tile, grid: Grid): Boolean {
+            return neighbours(grid).contains(tile) && tile is EmptyTile
+        }
     }
 }
 
@@ -94,10 +122,3 @@ enum class TileFactory(
         position: Position,
     ) = constructor(position)
 }
-
-
-
-
-
-
-

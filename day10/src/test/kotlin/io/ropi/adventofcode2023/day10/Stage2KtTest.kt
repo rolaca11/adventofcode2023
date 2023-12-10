@@ -7,8 +7,17 @@ class Stage2KtTest {
     @Test
     fun stage2Example() {
         assertThat(
-            this::class.java.classLoader.getResource("stage1-example")?.let { stage2(it.readText()) })
-            .isEqualTo(2)
+            this::class.java.classLoader.getResource("stage2-example1")?.let { stage2(it.readText()) })
+            .isEqualTo(4)
+        assertThat(
+            this::class.java.classLoader.getResource("stage2-example4")?.let { stage2(it.readText()) })
+            .isEqualTo(4)
+        assertThat(
+            this::class.java.classLoader.getResource("stage2-example2")?.let { stage2(it.readText()) })
+            .isEqualTo(8)
+        assertThat(
+            this::class.java.classLoader.getResource("stage2-example2")?.let { stage2(it.readText()) })
+            .isEqualTo(10)
     }
 
     @Test
