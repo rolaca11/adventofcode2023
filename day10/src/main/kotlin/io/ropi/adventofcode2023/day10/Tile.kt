@@ -20,13 +20,27 @@ sealed class Tile(
 
     fun neighbours(grid: Grid) = listOfNotNull(top(grid), bottom(grid), left(grid), right(grid))
 
-    open fun isInSameComponentAs(tile: Tile, grid: Grid) = isConnectedTo(tile, grid)
+    fun isInSameComponentAs(tile: Tile, grid: Grid) = neighbours(grid).contains(tile)
 
     fun isEdgeTile(grid: Grid) = neighbours(grid).size < 4
 
     override fun toString() = position.toString()
 
     abstract fun copy(position: Position): Tile
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Tile) return false
+
+        if (position != other.position) return false
+        if (javaClass != other.javaClass) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return position.hashCode() * 13 + javaClass.hashCode()
+    }
+
 
     class VerticalPipe(
         position: Position,
@@ -98,10 +112,6 @@ sealed class Tile(
             get() = emptyList()
 
         override fun copy(position: Position) = EmptyTile(position)
-
-        override fun isInSameComponentAs(tile: Tile, grid: Grid): Boolean {
-            return neighbours(grid).contains(tile) && tile is EmptyTile
-        }
     }
 }
 

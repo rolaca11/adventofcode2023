@@ -2,33 +2,33 @@ package io.ropi.adventofcode2023.day10
 
 import java.util.LinkedList
 
-class Grid(
-    private val tiles: Map<Position, Tile>
+data class Grid(
+    val tiles: Map<Position, Tile>
 ) {
     operator fun get(x: Int) = Row(x)
 
     operator fun get(position: Position) = tiles[position]
 
+    val mainLoop by lazy { tileDistanceMap().keys.toList() }
+
     fun groupTilesByComponent(): List<Component> {
-        val mainLoop = tileDistanceMap().keys
         val components = mutableListOf(
             Component(
-                tiles = mainLoop.toList(),
+                tiles = mainLoop,
                 grid = this,
                 isMainLoop = true
             )
         )
 
         while (true) {
-            val firstTile = tiles.values.find { tile -> !components.any { it.tiles.contains(tile) } } ?: break
-
-            components += Component(findAllTilesInComponent(firstTile), this)
+            components += tiles.values.find { tile -> !components.any { it.tiles.contains(tile) } }
+                ?.let { findAllTilesInComponent(it) } ?: break
         }
 
         return components
     }
 
-    fun findAllTilesInComponent(firstTile: Tile): List<Tile> {
+    fun findAllTilesInComponent(firstTile: Tile): Component {
         val route = LinkedList<Tile>()
         route += firstTile
         val currentComponent = mutableListOf(firstTile)
@@ -37,6 +37,7 @@ class Grid(
             val tile = try {
                 route.first.let { it.neighbours(this).filter { neighbour -> neighbour.isInSameComponentAs(it, this) } }
                     .filter { !route.contains(it) }
+                    .filter { !mainLoop.contains(it) }
                     .findOrThrow { !currentComponent.contains(it) }
             } catch (e: NoSuchElementException) {
                 if (route.isEmpty()) {
@@ -51,31 +52,32 @@ class Grid(
             currentComponent += tile
         }
 
-        return currentComponent
+        return Component(currentComponent, this)
     }
 
-    fun expandedGrid(): Grid {
-        return Grid(tiles.values.flatMap {
+    val expandedGrid by lazy {
+        Grid(tiles.values.flatMap {
             val copy = it.copy(it.position * 2)
+            val bottomPosition = copy.position + Position(0, 1)
+            val rightPosition = copy.position + Position(1, 0)
+
             listOfNotNull(
                 copy.position to copy,
                 copy.position + Position(1, 1) to Tile.EmptyTile(copy.position + Position(1, 1)),
                 it.bottom(this)?.let { tile ->
-                    val newPosition = copy.position + Position(1, 0)
-                    newPosition to if (it.isConnectedTo(tile, this)) {
-                        Tile.HorizontalPipe(newPosition)
+                    bottomPosition to if (it.isConnectedTo(tile, this)) {
+                        Tile.VerticalPipe(bottomPosition)
                     } else {
-                        Tile.EmptyTile(newPosition)
+                        Tile.EmptyTile(bottomPosition)
                     }
-                },
+                } ?: (bottomPosition to Tile.EmptyTile(bottomPosition)),
                 it.right(this)?.let { tile ->
-                    val newPosition = copy.position + Position(1, 0)
-                    newPosition to if (it.isConnectedTo(tile, this)) {
-                        Tile.HorizontalPipe(newPosition)
+                    rightPosition to if (it.isConnectedTo(tile, this)) {
+                        Tile.HorizontalPipe(rightPosition)
                     } else {
-                        Tile.EmptyTile(newPosition)
+                        Tile.EmptyTile(rightPosition)
                     }
-                },
+                } ?: (rightPosition to Tile.EmptyTile(rightPosition)),
             )
         }.toMap())
     }
@@ -110,6 +112,28 @@ class Grid(
         }
 
         return result.filterNot { it.key is Tile.EmptyTile }
+    }
+
+    override fun toString(): String {
+        val buffer = StringBuffer()
+        for (y in 0..tiles.keys.maxOf { it.y }) {
+            for (x in 0..tiles.keys.maxOf { it.x }) {
+                buffer.append(when(this[x][y]) {
+                    is Tile.EmptyTile -> "."
+                    is Tile.HorizontalPipe -> "-"
+                    is Tile.NorthEastPipe -> "L"
+                    is Tile.NorthWestPipe -> "J"
+                    is Tile.SouthEastPipe -> "F"
+                    is Tile.SouthWestPipe -> "7"
+                    is Tile.StartingTile -> "S"
+                    is Tile.VerticalPipe -> "|"
+                    null -> " "
+                })
+            }
+            buffer.append('\n')
+        }
+
+        return buffer.toString()
     }
 
     inner class Row(private val x: Int) {

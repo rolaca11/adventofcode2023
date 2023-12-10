@@ -9,12 +9,11 @@ data class Component(
         get() = tiles.any { it.neighbours(grid).size < 4 }
 
     fun canLeak(): Boolean {
+        val firstTile = tiles.first()
+        val component = grid.expandedGrid.findAllTilesInComponent(firstTile.copy(firstTile.position * 2))
+        println(Grid(component.tiles.map { it.position to it }.toMap()))
 
-        val expandedGrid = grid.expandedGrid()
-
-
-
-        return false
+        return component.touchesEdge
     }
 
 }

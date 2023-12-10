@@ -12,11 +12,15 @@ class Stage2KtTest {
         assertThat(
             this::class.java.classLoader.getResource("stage2-example4")?.let { stage2(it.readText()) })
             .isEqualTo(4)
+    }
+
+    @Test
+    fun stage2Example2() {
         assertThat(
             this::class.java.classLoader.getResource("stage2-example2")?.let { stage2(it.readText()) })
             .isEqualTo(8)
         assertThat(
-            this::class.java.classLoader.getResource("stage2-example2")?.let { stage2(it.readText()) })
+            this::class.java.classLoader.getResource("stage2-example3")?.let { stage2(it.readText()) })
             .isEqualTo(10)
     }
 
