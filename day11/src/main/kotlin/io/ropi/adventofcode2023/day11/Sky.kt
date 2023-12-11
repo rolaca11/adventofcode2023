@@ -1,11 +1,9 @@
 package io.ropi.adventofcode2023.day11
 
-import java.util.*
-
 class Sky(private val tiles: List<List<Tile>>) {
-    fun row(y: Int) = tiles[y]
+    private fun row(y: Int) = tiles[y]
 
-    fun column(x: Int) = tiles.map { row -> row[x] }
+    private fun column(x: Int) = tiles.map { row -> row[x] }
 
     operator fun get(y: Int) = try {
         row(y)
@@ -13,16 +11,8 @@ class Sky(private val tiles: List<List<Tile>>) {
         null
     }
 
-    operator fun get(position: Position) = try {
-        tiles[position.y][position.x]
-    } catch (e: NoSuchElementException) {
-        null
-    } catch (e: IndexOutOfBoundsException) {
-        null
-    }
-
-    val rows = tiles
-    val columns by lazy { tiles.random().indices.map { column(it) } }
+    private val rows = tiles
+    private val columns by lazy { tiles.random().indices.map { column(it) } }
 
     fun expanded(expansionFactor: Int): Sky {
         val emptyRows = rows.mapIndexed { index, row -> index to row }
@@ -52,7 +42,7 @@ class Sky(private val tiles: List<List<Tile>>) {
         return Sky(expandedTiles)
     }
 
-    fun List<Int>.expansionCount(i: Int) = count { it < i }
+    private fun List<Int>.expansionCount(i: Int) = count { it < i }
 
     fun findTiles(predicate: (Tile) -> Boolean) = tiles.flatten().filter(predicate)
 
