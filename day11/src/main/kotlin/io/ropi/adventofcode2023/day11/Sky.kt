@@ -24,7 +24,7 @@ class Sky(private val tiles: List<List<Tile>>) {
     val rows = tiles
     val columns by lazy { tiles.random().indices.map { column(it) } }
 
-    val expanded by lazy {
+    fun expanded(expansionFactor: Int): Sky {
         val emptyRows = rows.mapIndexed { index, row -> index to row }
             .filter { it.second.all { tile -> tile is Tile.Empty } }
             .map { it.first }
@@ -35,61 +35,26 @@ class Sky(private val tiles: List<List<Tile>>) {
         val expandedTiles = mutableListOf<List<Tile>>()
 
         tiles.mapIndexed { y, row ->
-            val addRow = {
-                val expandedRow = mutableListOf<Tile>()
-                row.mapIndexed { x, tile ->
-                    val addColumn = { expandedRow.add(tile.copy(Position(expandedRow.size, expandedTiles.size))) }
-
-                    addColumn()
-                    if (emptyColumns.contains(x)) {
-                        addColumn()
-                    }
-                }
-
-                expandedRow
+            val expandedRow = mutableListOf<Tile>()
+            row.mapIndexed { x, tile ->
+                val expansionCountX = emptyColumns.expansionCount(x)
+                val expansionCountY = emptyRows.expansionCount(y)
+                expandedRow.add(tile.copy(Position(
+                    x = (x - expansionCountX) + (expansionCountX * expansionFactor) + if(emptyColumns.contains(x)) (expansionFactor - 1) else 0,
+                    y = (y - expansionCountY) + (expansionCountY * expansionFactor) + if(emptyRows.contains(y)) (expansionFactor - 1) else 0
+                )))
             }
 
-            expandedTiles.add(addRow())
-            if (emptyRows.contains(y)) {
-                expandedTiles.add(addRow())
-            }
+            expandedTiles.add(expandedRow)
 
         }
 
-        Sky(expandedTiles)
+        return Sky(expandedTiles)
     }
 
-    val Tile.left: Tile? get() = this@Sky[this.position.left]
-    val Tile.top: Tile? get() = this@Sky[this.position.top]
-    val Tile.right: Tile? get() = this@Sky[this.position.right]
-    val Tile.bottom: Tile? get() = this@Sky[this.position.bottom]
-
-    val Tile.neighbours: List<Tile> get() = listOfNotNull(left, top, right, bottom)
+    fun List<Int>.expansionCount(i: Int) = count { it < i }
 
     fun findTiles(predicate: (Tile) -> Boolean) = tiles.flatten().filter(predicate)
-
-    fun findRoute(from: Tile, to: Tile): List<Tile> {
-        val startingRoute = LinkedList<Tile>()
-        var routes = listOf<Queue<Tile>>(startingRoute)
-        startingRoute.add(from)
-
-        while (true) {
-            routes = routes.flatMap { route ->
-                route.first().neighbours
-                    .filterNot { route.contains(it) }
-                    .map<Tile, Queue<Tile>> { LinkedList(route).apply { push(it) } }
-            }
-
-            val correctRoute = routes.find { it.contains(to) }
-            if (correctRoute != null) {
-                return correctRoute.toList()
-            } else if(routes.isEmpty()) {
-                throw Error()
-            } else {
-                continue
-            }
-        }
-    }
 
     companion object {
         fun parseFrom(input: String) = Sky(
