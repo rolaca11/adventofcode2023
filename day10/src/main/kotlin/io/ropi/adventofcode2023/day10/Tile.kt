@@ -18,7 +18,10 @@ sealed class Tile(
 
     fun isInSameComponentAs(tile: Tile, grid: Grid) = neighbours(grid).contains(tile)
 
-    fun isEdgeTile(grid: Grid) = neighbours(grid).size < 4
+    fun isEdgeTile(grid: Grid) = position.x == 0 ||
+            position.x == grid.width - 1 ||
+            position.y == 0 ||
+            position.y == grid.height - 1
 
     override fun toString() = position.toString()
 

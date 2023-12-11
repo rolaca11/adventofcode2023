@@ -6,7 +6,7 @@ data class Component(
     val isMainLoop: Boolean = false
 ) {
     val touchesEdge: Boolean
-        get() = tiles.any { it.value.neighbours(grid).size < 4 }
+        get() = tiles.any { it.value.isEdgeTile(grid) }
 
     fun canLeak(): Boolean {
 

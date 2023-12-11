@@ -120,10 +120,13 @@ data class Grid(
         return result.filterNot { it.key is Tile.EmptyTile }
     }
 
+    val height = tiles.keys.maxOf { it.y }
+    val width = tiles.keys.maxOf { it.x }
+
     override fun toString(): String {
         val buffer = StringBuffer()
-        for (y in 0..tiles.keys.maxOf { it.y }) {
-            for (x in 0..tiles.keys.maxOf { it.x }) {
+        for (y in 0..height) {
+            for (x in 0..width) {
                 buffer.append(
                     when (this[x][y]) {
                         is Tile.EmptyTile -> "."
