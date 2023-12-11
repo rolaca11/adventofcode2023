@@ -22,21 +22,19 @@ class Sky(private val tiles: List<List<Tile>>) {
             .filter { it.second.all { tile -> tile is Tile.Empty } }
             .map { it.first }
 
-        val expandedTiles = tiles.mapIndexed { y, row ->
-            val expandedRow = mutableListOf<Tile>()
+        return Sky(tiles.mapIndexed { y, row ->
             row.mapIndexed { x, tile ->
                 val expansionCountX = emptyColumns.expansionCount(x)
                 val expansionCountY = emptyRows.expansionCount(y)
-                expandedRow.add(tile.copy(Position(
-                    x = (x - expansionCountX) + (expansionCountX * expansionFactor) + if(emptyColumns.contains(x)) (expansionFactor - 1) else 0,
-                    y = (y - expansionCountY) + (expansionCountY * expansionFactor) + if(emptyRows.contains(y)) (expansionFactor - 1) else 0
-                )))
+
+                tile.copy(
+                    Position(
+                        x = (x - expansionCountX) + (expansionCountX * expansionFactor) + if (emptyColumns.contains(x)) (expansionFactor - 1) else 0,
+                        y = (y - expansionCountY) + (expansionCountY * expansionFactor) + if (emptyRows.contains(y)) (expansionFactor - 1) else 0
+                    )
+                )
             }
-
-            expandedRow
-        }
-
-        return Sky(expandedTiles)
+        })
     }
 
     private fun List<Int>.expansionCount(i: Int) = count { it < i }
