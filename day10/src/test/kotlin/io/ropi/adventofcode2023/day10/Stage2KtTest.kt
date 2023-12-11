@@ -28,6 +28,6 @@ class Stage2KtTest {
     fun stage2Actual() {
         assertThat(
             this::class.java.classLoader.getResource("actual")?.let { stage2(it.readText()) })
-            .isEqualTo(988)
+            .isGreaterThan(252).isLessThan(793).isEqualTo(252)
     }
 }

@@ -1,16 +1,12 @@
 package io.ropi.adventofcode2023.day10
 
 sealed class Tile(
-    val position: Position,
+    val position: Position
 ) {
-    fun left(grid: Grid) = grid.neighbour(Position.LEFT)
-    fun top(grid: Grid) = grid.neighbour(Position.TOP)
-    fun right(grid: Grid) = grid.neighbour(Position.RIGHT)
-    fun bottom(grid: Grid) = grid.neighbour(Position.BOTTOM)
-
-    private fun Grid.neighbour(diff: Position): Tile? {
-        return this[position + diff]
-    }
+    fun left(grid: Grid) = grid[position + Position.LEFT]
+    fun top(grid: Grid) = grid[position + Position.TOP]
+    fun right(grid: Grid) = grid[position + Position.RIGHT]
+    fun bottom(grid: Grid) = grid[position + Position.BOTTOM]
 
     protected abstract val Grid.connectedNeighbours: List<Tile>
 

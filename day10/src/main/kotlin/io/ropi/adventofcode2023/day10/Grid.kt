@@ -1,6 +1,9 @@
 package io.ropi.adventofcode2023.day10
 
 import java.util.LinkedList
+import java.util.concurrent.atomic.AtomicInteger
+
+val i = AtomicInteger(0)
 
 data class Grid(
     val tiles: Map<Position, Tile>
@@ -14,31 +17,34 @@ data class Grid(
     fun groupTilesByComponent(): List<Component> {
         val components = mutableListOf(
             Component(
-                tiles = mainLoop,
+                tiles = mainLoop.associateBy { it.position },
                 grid = this,
                 isMainLoop = true
             )
         )
 
+        var i = 0
         while (true) {
-            components += tiles.values.find { tile -> !components.any { it.tiles.contains(tile) } }
+            println("GROUPING: ${i++}")
+            components += tiles.values.find { tile -> !components.any { it.tiles.values.contains(tile) } }
                 ?.let { findAllTilesInComponent(it) } ?: break
         }
 
         return components
     }
 
-    fun findAllTilesInComponent(firstTile: Tile): Component {
+    fun findAllTilesInComponent(firstTile: Tile, grid: Grid = this): Component {
+        println("BFS Count: ${i.incrementAndGet()}")
         val route = LinkedList<Tile>()
         route += firstTile
-        val currentComponent = mutableListOf(firstTile)
+        val currentComponent = mutableMapOf(firstTile.position to firstTile)
 
         while (true) {
             val tile = try {
                 route.first.let { it.neighbours(this).filter { neighbour -> neighbour.isInSameComponentAs(it, this) } }
                     .filter { !route.contains(it) }
                     .filter { !mainLoop.contains(it) }
-                    .findOrThrow { !currentComponent.contains(it) }
+                    .findOrThrow { !currentComponent.values.contains(it) }
             } catch (e: NoSuchElementException) {
                 if (route.isEmpty()) {
                     break
@@ -49,10 +55,10 @@ data class Grid(
             }
 
             route.push(tile)
-            currentComponent += tile
+            currentComponent += tile.position to tile
         }
 
-        return Component(currentComponent, this)
+        return Component(currentComponent, grid)
     }
 
     val expandedGrid by lazy {
@@ -118,17 +124,19 @@ data class Grid(
         val buffer = StringBuffer()
         for (y in 0..tiles.keys.maxOf { it.y }) {
             for (x in 0..tiles.keys.maxOf { it.x }) {
-                buffer.append(when(this[x][y]) {
-                    is Tile.EmptyTile -> "."
-                    is Tile.HorizontalPipe -> "-"
-                    is Tile.NorthEastPipe -> "L"
-                    is Tile.NorthWestPipe -> "J"
-                    is Tile.SouthEastPipe -> "F"
-                    is Tile.SouthWestPipe -> "7"
-                    is Tile.StartingTile -> "S"
-                    is Tile.VerticalPipe -> "|"
-                    null -> " "
-                })
+                buffer.append(
+                    when (this[x][y]) {
+                        is Tile.EmptyTile -> "."
+                        is Tile.HorizontalPipe -> "-"
+                        is Tile.NorthEastPipe -> "L"
+                        is Tile.NorthWestPipe -> "J"
+                        is Tile.SouthEastPipe -> "F"
+                        is Tile.SouthWestPipe -> "7"
+                        is Tile.StartingTile -> "S"
+                        is Tile.VerticalPipe -> "|"
+                        null -> " "
+                    }
+                )
             }
             buffer.append('\n')
         }
