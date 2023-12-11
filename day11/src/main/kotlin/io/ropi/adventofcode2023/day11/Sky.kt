@@ -18,7 +18,7 @@ class Sky(private val tiles: List<List<Tile>>) {
         val emptyRows = rows.mapIndexed { index, row -> index to row }
             .filter { it.second.all { tile -> tile is Tile.Empty } }
             .map { it.first }
-        val emptyColumns = columns.mapIndexed { index, row -> index to row }
+        val emptyColumns = columns.mapIndexed { index, column -> index to column }
             .filter { it.second.all { tile -> tile is Tile.Empty } }
             .map { it.first }
 
