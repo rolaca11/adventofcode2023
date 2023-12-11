@@ -22,9 +22,7 @@ class Sky(private val tiles: List<List<Tile>>) {
             .filter { it.second.all { tile -> tile is Tile.Empty } }
             .map { it.first }
 
-        val expandedTiles = mutableListOf<List<Tile>>()
-
-        tiles.mapIndexed { y, row ->
+        val expandedTiles = tiles.mapIndexed { y, row ->
             val expandedRow = mutableListOf<Tile>()
             row.mapIndexed { x, tile ->
                 val expansionCountX = emptyColumns.expansionCount(x)
@@ -35,8 +33,7 @@ class Sky(private val tiles: List<List<Tile>>) {
                 )))
             }
 
-            expandedTiles.add(expandedRow)
-
+            expandedRow
         }
 
         return Sky(expandedTiles)
